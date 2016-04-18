@@ -1,0 +1,15 @@
+{ "stars":[
+            {"name":"br", "leds": [0, 1, 2]},
+            {"name":"mr","leds": [3, 4]},
+            {"name":"sr", "leds": [5]},
+            {"name":"by", "leds": [6, 7, 8]},
+            {"name":"my", "leds": [9, 10]},
+            {"name":"sy","leds": [11]},
+            {"name":"bo","leds": [12, 13, 14]},
+            {"name":"mo", "leds": [15, 16]},
+            {"name":"so", "leds": [17]},
+            {"name":"bb", "leds": [18, 19, 20]},
+            {"name":"mb","leds": [21, 22]},
+            {"name":"sb", "leds": [23]}
+]
+}
