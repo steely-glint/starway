@@ -36,6 +36,7 @@ public class Reno extends Thread {
     private final Star[] _stars;
     private final Sender _sender;
     private boolean _performing = false;
+    private final RFID _rfid;
 
     Reno(String confFile) throws FileNotFoundException {
         Config conf = new Config();
@@ -54,20 +55,30 @@ public class Reno extends Thread {
         int allLeds = conf.getMaxLeds();
         Log.debug("reserving space for" + allLeds + " Leds");
         _sender = new Sender(iad, allLeds);
+        String arduino = conf.getRFID();
+        _rfid = new RFID(arduino);
     }
 
     public void run() {
         for (Star s : _stars) {
-            s.setColour(128, 128, 192);
+            s.setColour(8, 8, 32);
         }
         try {
             while (true) {
                 try {
                     _sender.send(_stars);
                     Thread.sleep(100);
-                    if (!_performing) {
+                    String cards[] = _rfid.currentCards();
+                    if (cards.length == 0){
                         for (Star s : _stars) {
                             s.twinkle();
+                        }
+                    } else {
+                        for (String card:cards){
+                            long l = Long.parseLong(card);
+                            int sno = (int) (l % _stars.length);
+                            Log.debug("star no "+sno);
+                            _stars[sno].setColour(128,128,212);
                         }
                     }
                 } catch (InterruptedException ex) {

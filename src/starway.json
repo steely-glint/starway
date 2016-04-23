@@ -11,5 +11,9 @@
             {"name":"bb", "leds": [18, 19, 20]},
             {"name":"mb","leds": [21, 22]},
             {"name":"sb", "leds": [23]}
-]
+],
+"boneAddress": "192.67.4.18",
+"bonePort": 7890,
+"maxLeds": 30,
+"RFID": "/dev/ttyACM0"
 }
