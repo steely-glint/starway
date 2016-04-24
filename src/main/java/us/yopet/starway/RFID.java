@@ -17,6 +17,8 @@ import java.util.Hashtable;
 import static java.util.Locale.filter;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,11 +26,12 @@ import java.util.logging.Logger;
  *
  * @author thp
  */
-public class RFID extends Thread {
+abstract public class RFID extends Thread {
 
     private DataInputStream _rfidtty;
-    private final HashMap<String,Long> _seen;
+    private final HashMap<String, Long> _seen;
     static long EXPIRETIME = 1000;
+    private Timer _tick;
 
     RFID(String arduino) throws FileNotFoundException {
         File tty = new File(arduino);
@@ -40,7 +43,28 @@ public class RFID extends Thread {
         this.setDaemon(true);
         this.setName("RFID-reader");
         this.start();
+        _tick = new Timer();
         _seen = new HashMap();
+    }
+
+    abstract void cardDeleteEvent(String rfid) ;
+    abstract void cardAddEvent(String rfid) ;
+
+    private void maybeRemove(String rfid) {
+        boolean fire = false;
+        Log.verb("checking " + rfid);
+        synchronized (_seen) {
+            long then = System.currentTimeMillis() - EXPIRETIME;
+            Long when = _seen.get(rfid);
+            if (when < then) {
+                Long rem = _seen.remove(rfid);
+                Log.verb("removing " + rfid);
+                fire = rem != null;
+            }
+        }
+        if (fire) {
+            cardDeleteEvent(rfid);
+        }
     }
 
     public void run() {
@@ -56,8 +80,20 @@ public class RFID extends Thread {
                     if (bits.length > 1) {
                         Log.debug("card serial " + bits[1]);
                         Long now = new Long(System.currentTimeMillis());
-                        synchronized (_seen){
-                            _seen.put(bits[1], now);
+                        final String cardSerial = bits[1];
+                        Long previous = null;
+                        synchronized (_seen) {
+                            previous = _seen.put(cardSerial, now);
+                        }
+                        TimerTask tt = new TimerTask() {
+                            @Override
+                            public void run() {
+                                maybeRemove(cardSerial);
+                            }
+                        };
+                        _tick.schedule(tt, EXPIRETIME + 10);
+                        if (previous == null) {
+                            cardAddEvent(cardSerial);
                         }
                     }
                 }
@@ -66,25 +102,11 @@ public class RFID extends Thread {
             Log.debug("RFID problem " + ex.toString());
         }
     }
-    
-    public String[] currentCards(){
+
+    public String[] currentCards() {
         String[] ret = {};
-        ArrayList <String> deletes = new ArrayList();
-        ArrayList <String> cards = new ArrayList();
-        synchronized (_seen){
-            long then = System.currentTimeMillis() - EXPIRETIME;
-            for(String rfid : _seen.keySet()){
-                Long when = _seen.get(rfid);
-                if (when < then){
-                    deletes.add(rfid);
-                } else {
-                    cards.add(rfid);
-                }
-            }
-            for (String k:deletes){
-                _seen.remove(k);
-            }
-            ret = cards.toArray(ret);
+        synchronized (_seen) {
+            ret = _seen.keySet().toArray(ret);
         }
         return ret;
     }
