@@ -10,6 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Vector;
 import javax.json.JsonArray;
 
 /**
@@ -17,6 +19,10 @@ import javax.json.JsonArray;
  * @author thp
  */
 public class Reno extends Thread {
+
+    HashMap<Long, Star> _sequence;
+    HashMap<String, Star> _selected;
+    Long _nextStar = new Long(0);
 
     public static void main(String args[]) {
         Log.setLevel(Log.DEBUG);
@@ -50,8 +56,12 @@ public class Reno extends Thread {
         _stars = new Star[jstars.size()];
         Log.debug("building" + _stars.length + " stars");
 
+        _selected = new HashMap();
+        _sequence = new HashMap();
+
         for (int i = 0; i < _stars.length; i++) {
             _stars[i] = new Star(jstars.getJsonObject(i));
+            _sequence.put(_stars[i].getSeq(), _stars[i]);
         }
         _onStars = new ArrayList();
         InetSocketAddress iad = conf.getSenderAddress();
@@ -62,20 +72,16 @@ public class Reno extends Thread {
         _rfid = new RFID(arduino) {
             @Override
             void cardDeleteEvent(String rfid) {
-                long l = Long.parseLong(rfid);
-                int sno = (int) (l % _stars.length);
-                Log.debug("star no " + sno);
-                _stars[sno].setColour(128, 128, 212);
-                _onStars.remove(_stars[sno]);
+                Star star = pickStar(rfid);
+                star.setColour(128, 128, 212);
+                _onStars.remove(star);
             }
 
             @Override
             void cardAddEvent(String rfid) {
-                long l = Long.parseLong(rfid);
-                int sno = (int) (l % _stars.length);
-                Log.debug("star no " + sno);
-                _stars[sno].setColour(255, 64, 64);
-                _onStars.add(_stars[sno]);
+                Star star = pickStar(rfid);
+                star.setColour(255, 64, 64);
+                _onStars.add(star);
             }
         };
     }
@@ -106,5 +112,29 @@ public class Reno extends Thread {
         } catch (IOException ex) {
             System.err.println("Quitting due to io exception " + ex.toString());
         }
+    }
+
+    Star pickStar(String rfid) {
+        Star ret = null;
+        // see if we have already allocated it
+        ret = _selected.get(rfid);
+        if (ret == null) {
+            // take the next one from the sequence
+            if (_sequence.size() > 0) {
+                ret = _sequence.remove(_nextStar);
+                if (ret != null) {
+                    System.err.println("Sequence number " + _nextStar);
+                    _nextStar = new Long(_nextStar.longValue() + 1);
+                }
+            }
+            // last gasp - just pick a random (ish) one
+            if (ret == null) {
+                long l = Long.parseLong(rfid);
+                int sno = (int) (l % _stars.length);
+                ret = _stars[sno];
+            }
+            _selected.put(rfid, ret);
+        }
+        return ret;
     }
 }

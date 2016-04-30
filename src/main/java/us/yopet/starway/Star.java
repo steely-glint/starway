@@ -24,6 +24,7 @@ public class Star {
     private int _twinkleInterval;
     private final int _twinkleAmplitude;
     private final int _twinkleDuration;
+    private Long _seq = null;
 
     public Star(JsonObject config) {
         _twinkleCount = 0;
@@ -37,6 +38,7 @@ public class Star {
             _leds[i] = new RGBLed(leds.getInt(i));
         }
         _name = config.getString("name");
+        _seq = new Long(config.getInt("seq",0));
     }
 
     void put(ByteBuffer bb, int base) {
@@ -67,5 +69,9 @@ public class Star {
                 led.green -= _twinkleAmplitude;
             }
         }
+    }
+
+    Long getSeq() {
+        return _seq;
     }
 }
