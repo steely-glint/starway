@@ -23,8 +23,8 @@ public class Sender {
     private DatagramSocket _udp;
     private int _capacity;
 
-    void send(Star[] stars) throws IOException {
-
+    double send(Star[] stars) throws IOException {
+        double power = 0.0;
         short body_len = (short) (_capacity - 4);
         ByteBuffer buffer = ByteBuffer.allocate(_capacity);
         buffer.put(0, (byte) 0);// channel
@@ -33,16 +33,18 @@ public class Sender {
         int offs = 4;
         for (Star s : stars) {
             s.put(buffer, offs);
+            power += s.getPower();
         }
         byte[] opcMess = buffer.array();
         DatagramPacket dgp = new DatagramPacket(opcMess, 0, opcMess.length, this._toAdd);
-        Log.verb(("sending packet size "+opcMess.length+ " to "+_toAdd));
+        Log.verb(("sending packet size " + opcMess.length + " to " + _toAdd));
         _udp.send(dgp);
+        return power;
     }
 
-    Sender(InetSocketAddress address,int ledCount) {
+    Sender(InetSocketAddress address, int ledCount) {
         _toAdd = address;
-        _capacity = (ledCount * 3 + 4);        
+        _capacity = (ledCount * 3 + 4);
         try {
             _udp = new DatagramSocket();
         } catch (SocketException ex) {

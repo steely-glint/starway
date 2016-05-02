@@ -20,29 +20,37 @@ import javax.json.JsonArray;
  */
 public class Reno extends Thread {
 
+    private static Reno _reno;
+    static String filename = "starway.json";
+
     HashMap<Long, Star> _sequence;
     HashMap<String, Star> _selected;
     Long _nextStar = new Long(0);
 
     public static void main(String args[]) {
         Log.setLevel(Log.DEBUG);
-        String filename = "starway.json:";
         if (args.length == 1) {
             filename = args[0];
         }
         Reno ren;
         try {
-            ren = new Reno(filename);
-            ren.setName("Reno-main");
-            Log.debug("starting message thread");
-            ren.start();
+            ren = starFactory();
         } catch (FileNotFoundException ex) {
             System.err.println("Config File " + filename + " not found - giving up");
         }
     }
+    public static Reno starFactory() throws FileNotFoundException{
+        if (_reno == null){
+            _reno  = new Reno(filename);
+            _reno.setName("Reno-main");
+            Log.debug("starting message thread");
+            _reno.start();
+        }
+        return _reno;
+    }
+    
     private final Star[] _stars;
     private final Sender _sender;
-    private boolean _performing = false;
     private final RFID _rfid;
     private ArrayList<Star> _onStars;
 
@@ -85,7 +93,13 @@ public class Reno extends Thread {
             }
         };
     }
-
+    private double _power =0.0;
+    public double getPower(){
+        return _power;
+    }
+    public void clear(){
+        _selected.clear();
+    }
     public void run() {
         for (Star s : _stars) {
             s.setColour(8, 8, 32);
@@ -99,11 +113,11 @@ public class Reno extends Thread {
                         for (Star s : _stars) {
                             s.twinkle();
                         }
-                        _sender.send(_stars);
+                        _power = _sender.send(_stars);
 
                     } else {
                         Star s[] = {};
-                        _sender.send(_onStars.toArray(s));
+                        _power = _sender.send(_onStars.toArray(s));
                     }
                 } catch (InterruptedException ex) {
                     ;// who cares...

@@ -46,7 +46,13 @@ public class Star {
             led.put(bb, base);
         }
     }
-
+    double getPower(){
+        double power =0.0;
+        for (RGBLed led : _leds) {
+            power += led.getPower();
+        }
+        return power;
+    }
     void setColour(int r, int g, int b) {
         for (RGBLed led : _leds) {
             led.red = r;
