@@ -19,6 +19,7 @@ public class Star {
     SecureRandom rand = new SecureRandom();
     private final RGBLed[] _leds;
     private final String _name;
+    private final int _size;
     final static int TWINKLE = 10;
     private int _twinkleCount;
     private int _twinkleInterval;
@@ -30,7 +31,7 @@ public class Star {
         _twinkleCount = 0;
         _twinkleInterval = 5 + rand.nextInt(15);
         _twinkleAmplitude = 25;
-        _twinkleDuration = 1 +rand.nextInt(4);
+        _twinkleDuration = 1 + rand.nextInt(4);
         JsonArray leds = config.getJsonArray("leds");
         int nleds = (leds == null) ? 0 : leds.size();
         _leds = new RGBLed[nleds];
@@ -38,7 +39,8 @@ public class Star {
             _leds[i] = new RGBLed(leds.getInt(i));
         }
         _name = config.getString("name");
-        _seq = new Long(config.getInt("seq",0));
+        _seq = new Long(config.getInt("seq", 0));
+        _size = config.getInt("size", 0);
     }
 
     void put(ByteBuffer bb, int base) {

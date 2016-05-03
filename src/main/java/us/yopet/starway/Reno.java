@@ -26,7 +26,7 @@ public class Reno extends Thread {
 
     public static void main(String args[]) {
         Log.setLevel(Log.DEBUG);
-        String filename = "starway.json:";
+        String filename = "starway.json";
         if (args.length == 1) {
             filename = args[0];
         }
@@ -54,7 +54,7 @@ public class Reno extends Thread {
         JsonArray jstars = conf.getStars();
 
         _stars = new Star[jstars.size()];
-        Log.debug("building" + _stars.length + " stars");
+        Log.debug("building " + _stars.length + " stars");
 
         _selected = new HashMap();
         _sequence = new HashMap();
@@ -66,7 +66,7 @@ public class Reno extends Thread {
         _onStars = new ArrayList();
         InetSocketAddress iad = conf.getSenderAddress();
         int allLeds = conf.getMaxLeds();
-        Log.debug("reserving space for" + allLeds + " Leds");
+        Log.debug("reserving space for " + allLeds + " Leds");
         _sender = new Sender(iad, allLeds);
         String arduino = conf.getRFID();
         _rfid = new RFID(arduino) {
@@ -133,6 +133,7 @@ public class Reno extends Thread {
                 int sno = (int) (l % _stars.length);
                 ret = _stars[sno];
             }
+            // either way remember what we did.
             _selected.put(rfid, ret);
         }
         return ret;
