@@ -76,4 +76,11 @@ public class Star {
     Long getSeq() {
         return _seq;
     }
+    
+    int getSize(){
+        return _size;
+    }
+    String getName(){
+        return _name;
+    }
 }
