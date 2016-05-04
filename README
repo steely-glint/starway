@@ -1,0 +1,63 @@
+# starway
+A set of java classes to emit opc packets driving a LEDscape array - used for StarWay sculpture in Reno 
+Key feautures:
+1) mapping stars to leds - a config file allows selection of multiple leds to act as a single 'star'
+2) generation of valid opc packets to drive the leds
+3) 'twinkle' mode which illuminates all the stars with a shade at a slightly varying intensity
+4) 'action' mode which is activated when a specific star is selected (via rfid)
+5) mapping of rfid tokens to stars
+
+Hardware:
+
+1) Adafruit mifare Rfid shield  (https://www.adafruit.com/products/789)
+2) Arduino Mega (with rfid sheild plugged in) 
+    Arduino runs the 'classic mi-fare' example from adafruit's library
+connects over USB to Beagleboneblack number 1
+3) BBB #1 runs the java program from this directory reading from 
+/dev/ttyACM0 (the arduino) and sending OPC udp packets to a second BBB
+4) BBB #2 runs LEDscape https://github.com/Yona-Appletree/LEDscape 
+configured to talk to 48*3 Leds on each of the first 5 data lines.
+5) 693 RGB LEDs
+One line drives all the LEDs in a diamond (the Sculpture is made of
+5 diamonds, each with upto 48 stars, each star containing 3 WS281x LEDs
+
+
+Notes:
+i) the only reason for having 2 beaglebones is that for optimum
+viewing the RFID reader needs to be 30+ feet from the Stars. 
+This is too long for USB. We used an old airport express as a
+DHCP router/switch (this makes it easier to plug other things into the
+BBBs than static IP addressing).
+
+ii) The Beaglebone is nominally a 3.3v device - the LEDs are 5v.
+fortunately they work without a level switcher between the two.
+
+iii) the OPC UDP packets sent by this software are quite large 
+at 2083 bytes (not counting the header). This works fine over a LAN
+but will probably not work over WANs or through anything with a smaller MTU,
+unless UDP fragmentation happens to be working. Ideally LEDscape would be
+on the same host as the RFID and send the packets over the loopback interface.
+
+Building/testing software:
+1) follow the adafruit guide on building the rfid library and sample code
+2) install oracle java8 on the beaglebone #1 (or in theory a pi or other small
+linux with USB serial support and a working ethernet)
+3) build this software with the command
+mvn package
+copy the resulting .jar file to the beaglebone #1
+run 
+java -cp starway-1.0-SNAPSHOT.jar us.yopet.starway.MkConfig bigstar.json
+to generate the config file - edit it to configure serial ports/ipaddresses
+4) on BBB 2 install LEDscape (following the instructions in the git tree)
+ - configure the config file for 5 strings of 144 LEDs
+and select an idle mode ('fade' works well)
+leave LEDscape running
+5) run this software on BBB1 
+java --jar starway-1.0-SNAPSHOT.jar  bigstar.json
+
+the stars should now twinkle.
+
+6) present an RFID.
+
+
+
