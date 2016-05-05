@@ -120,6 +120,20 @@ public class MkConfig {
             }
             ledStart += leds_per_diamond;
         }
+        // add center 'star' - a neopixel ring.
+        JsonArrayBuilder leds = Json.createArrayBuilder();
+        ledno = ledStart;
+        for (int l = 0; l < 24; l++) {
+            leds.add(ledno++);
+        }
+        stars.add(
+                Json.createObjectBuilder()
+                .add("name", "FA")
+                .add("leds", leds)
+                .add("seq", -1)
+                .add("size", 24)
+        );
+        // now add the whole thing.
         conf.add("stars", stars);
         JsonObject jo = conf.build();
         Map<String, Object> properties = new HashMap<>(1);

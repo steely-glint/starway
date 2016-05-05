@@ -44,6 +44,7 @@ abstract public class Controller extends Thread {
         _sequence = new HashMap();
 
         for (int i = 0; i < _stars.length; i++) {
+            // special case for last one ?
             _stars[i] = new Star(jstars.getJsonObject(i));
             _sequence.put(_stars[i].getSeq(), _stars[i]);
         }
@@ -55,10 +56,14 @@ abstract public class Controller extends Thread {
     }
 
     abstract boolean hasSelectedCard();
-    
+
     public void run() {
         for (Star s : _stars) {
-            s.setColour(8, 8, 32);
+            if (s.getName().equals("FA")) {
+                s.setColour(8, 128, 8); // center star is bright green .
+            } else {
+                s.setColour(8, 8, 32);
+            }
         }
         try {
             while (true) {
@@ -100,7 +105,7 @@ abstract public class Controller extends Thread {
             // last gasp - just pick a random (ish) one
             if (ret == null) {
                 long l = Long.parseLong(rfid);
-                int sno = (int) (l % _stars.length);
+                int sno = (int) (l % _stars.length - 1); // last star is special.
                 ret = _stars[sno];
             }
             // either way remember what we did.
