@@ -67,9 +67,9 @@ abstract public class RFID extends Thread {
             while (true) {
                 String line = _rfidtty.readLine();
                 Log.verb("Rfid >" + line);
-                if (line.startsWith("Seems to be a Mifare Classic card")) {
-                    Log.verb("Mifare seen");
-                    String[] bits = line.split("#");
+                if (line.contains("UID Value:")) {
+                    Log.verb("RFID seen");
+                    String[] bits = line.split(":");
                     if (bits.length > 1) {
                         Log.debug("card serial " + bits[1]);
                         Long now = new Long(System.currentTimeMillis());

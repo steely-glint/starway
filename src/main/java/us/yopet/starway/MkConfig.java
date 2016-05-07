@@ -64,7 +64,7 @@ public class MkConfig {
             Y, R, Y, B, B, R, Y, B};
         char diamonds[] = {'A', 'B', 'C', 'D', 'E'};
 
-        Log.setLevel(Log.DEBUG);
+        Log.setLevel(Log.VERB);
         Writer fWriter = null;
         if (args.length > 0) {
             fWriter = new FileWriter(args[0]);
@@ -87,7 +87,7 @@ public class MkConfig {
         for (int i = 0; i < total_stars; i++) {
             seqList.add(new Integer(i));
         }
-        conf.add("maxLeds", diamond_count * stars_per_diamond * leds_per_star);
+        conf.add("maxLeds", (diamond_count +1) * stars_per_diamond * leds_per_star);
         HashMap<String, Boolean> missing = new HashMap();
         for (String m : buriedStars) {
             missing.put(m, Boolean.TRUE);
@@ -128,7 +128,7 @@ public class MkConfig {
         }
         stars.add(
                 Json.createObjectBuilder()
-                .add("name", "FA")
+                .add("name", "F1")
                 .add("leds", leds)
                 .add("seq", -1)
                 .add("size", 24)

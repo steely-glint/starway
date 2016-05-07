@@ -59,8 +59,8 @@ abstract public class Controller extends Thread {
 
     public void run() {
         for (Star s : _stars) {
-            if (s.getName().equals("FA")) {
-                s.setColour(8, 128, 8); // center star is bright green .
+            if (s.getName().equals("F1")) {
+                s.setColour(4, 64, 4); // center star is bright green .
             } else {
                 s.setColour(8, 8, 32);
             }
@@ -70,7 +70,7 @@ abstract public class Controller extends Thread {
                 try {
                     Thread.sleep(100);
                     _performing = hasSelectedCard();
-                    if (_performing) {
+                    if (!_performing) {
                         for (Star s : _stars) {
                             s.twinkle();
                         }
@@ -98,14 +98,14 @@ abstract public class Controller extends Thread {
             if (_sequence.size() > 0) {
                 ret = _sequence.remove(_nextStar);
                 if (ret != null) {
-                    System.err.println("Sequence number " + _nextStar);
+                    Log.debug("Sequence number " + _nextStar);
                     _nextStar = new Long(_nextStar.longValue() + 1);
                 }
             }
             // last gasp - just pick a random (ish) one
             if (ret == null) {
-                long l = Long.parseLong(rfid);
-                int sno = (int) (l % _stars.length - 1); // last star is special.
+                int l = rfid.hashCode();
+                int sno = l % (_stars.length - 1); // last star is special.
                 ret = _stars[sno];
             }
             // either way remember what we did.

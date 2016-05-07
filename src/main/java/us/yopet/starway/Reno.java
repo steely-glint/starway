@@ -49,6 +49,7 @@ public class Reno extends Controller {
             void cardAddEvent(String rfid) {
                 Star star = pickStar(rfid);
                 star.setColour(255, 64, 64);
+                Log.debug("Star "+star.getName());
                 _onStars.add(star);
             }
         };

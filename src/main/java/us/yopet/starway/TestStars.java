@@ -59,7 +59,7 @@ public class TestStars extends Controller {
             public void run() {
                 if (_currentStar != null) {
                     colourStarBySize();
-                    //_onStars.remove(_currentStar); make a snake.
+                    //_onStars.remove(_currentStar); //make a snake.
                 }
                 if (_starno < _stars.length) {
                     _currentStar = _stars[_starno++];
