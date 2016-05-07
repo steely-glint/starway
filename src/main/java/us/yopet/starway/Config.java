@@ -42,6 +42,13 @@ public class Config {
         InetSocketAddress ret = new InetSocketAddress(ip, portI);
         return ret;
     }
+    
+    InetSocketAddress getLocalSenderAddress() {
+        String ip = "127.0.0.1";
+        int portI = _config.getInt("bonePort", 7890);
+        InetSocketAddress ret = new InetSocketAddress(ip, portI);
+        return ret;
+    }
 
     int getMaxLeds() {
         int ret = _config.getInt("maxLeds", 24);

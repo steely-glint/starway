@@ -7,13 +7,18 @@ package us.yopet.starway;
 
 import com.phono.srtplight.Log;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 
 /**
  *
  * @author thp
  */
 public class Reno extends Controller {
-
 
     public static void main(String args[]) {
         Log.setLevel(Log.DEBUG);
@@ -37,6 +42,22 @@ public class Reno extends Controller {
     Reno(String confFile) throws FileNotFoundException {
         super(confFile);
         String arduino = _conf.getRFID();
+        InetSocketAddress lad = _conf.getLocalSenderAddress();
+        int ringsz = 24;
+        Log.debug("reserving space for " + ringsz + " Leds");
+        final Sender localsender = new Sender(lad, 24);
+        final Star[] localStars = new Star[1];
+        JsonArrayBuilder leds = Json.createArrayBuilder();
+        for (int l = 0; l < ringsz; l++) {
+            leds.add(l);
+        }
+        localStars[0] = new Star(Json.createObjectBuilder()
+                .add("name", "CONSOLE")
+                .add("leds", leds)
+                .add("seq", 1)
+                .add("size", ringsz).build());
+        localStars[0].setColour(255, 225, 255);
+
         _rfid = new RFID(arduino) {
             @Override
             void cardDeleteEvent(String rfid) {
@@ -49,13 +70,18 @@ public class Reno extends Controller {
             void cardAddEvent(String rfid) {
                 Star star = pickStar(rfid);
                 star.setColour(255, 64, 64);
-                Log.debug("Star "+star.getName());
+                Log.debug("Star " + star.getName());
                 _onStars.add(star);
+                try {
+                    localsender.send(localStars);
+                } catch (IOException ex) {
+                    Log.error("ioexception in local send");
+                }
+
             }
         };
-    }
 
-  
+    }
 
     @Override
     boolean hasSelectedCard() {
