@@ -1,0 +1,13 @@
+#!/bin/sh
+DIRNAME="`dirname "$0"`"
+cd "$DIRNAME"
+
+# Uncomment to ensure that SSH is running. It really sucks when you (or systemd) screw up it doesn't start. Since HDMI is disabled,
+# it's REALLY important that SSHd be running, since you have no other easy option to connect.
+# (sleep 30; /usr/bin/sshd -f /etc/ssh/sshd_config) &
+
+modprobe uio_pruss
+#./opc-server -P 7890 -s 48 -c 64
+su - thp -c 'nohup java -Djava.net.preferIPv4Stack=true -jar thingbone-1.0-SNAPSHOT.jar >thing.out &'
+su - thp -c 'nohup ./starway.sh > starway.out &'
+./opc-server --config ring.json
