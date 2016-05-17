@@ -17,9 +17,18 @@ connects over USB to Beagleboneblack number 1
 /dev/ttyACM0 (the arduino) and sending OPC udp packets to a second BBB
 4) BBB #2 runs LEDscape https://github.com/Yona-Appletree/LEDscape 
 configured to talk to 48*3 Leds on each of the first 5 data lines.
-5) 693 RGB LEDs
-One line drives all the LEDs in a diamond (the Sculpture is made of
-5 diamonds, each with upto 48 stars, each star containing 3 WS281x LEDs
+Notice that the startup script does the appropriate stty actions
+to set the USB tty to 9600 baud etc.
+5) The main sculpture consists of 693 RGB LEDs
+One data pin drives all the LEDs in each diamond (the Sculpture is made of
+5 diamonds (A->E), each with upto 48 (1->48) stars, each star containing 3 WS281x LEDs)
+6) an additional central star (larger and brighter than the rest) consists
+of 24 leds in a neopixel ring. - this is on data line 6 of BBB #2 and 
+called 'F1' in the config file.
+7) The Rfid console also has a lighting effect. This is provided by a
+second install of LEDScape running on BBB #1 - driving a second neopixel
+ring under the RFID reader (this is physically mounted on the BBB). This is
+'CONSOLE' in the config file.
 
 
 Notes:
@@ -27,10 +36,12 @@ i) the only reason for having 2 beaglebones is that for optimum
 viewing the RFID reader needs to be 30+ feet from the Stars. 
 This is too long for USB. We used an old airport express as a
 DHCP router/switch (this makes it easier to plug other things into the
-BBBs than static IP addressing).
+BBBs than static IP addressing) and connected the 2 ends over an ethernet cable.
 
 ii) The Beaglebone is nominally a 3.3v device - the LEDs are 5v.
-fortunately they work without a level switcher between the two.
+fortunately they work without a level switcher between the two. 
+(This requires that the first LED in each diamond is close to the BBB#1,
+in then passes on a 5volt signal - acting as a buffer)
 
 iii) the OPC UDP packets sent by this software are quite large 
 at 2083 bytes (not counting the header). This works fine over a LAN
@@ -38,11 +49,18 @@ but will probably not work over WANs or through anything with a smaller MTU,
 unless UDP fragmentation happens to be working. Ideally LEDscape would be
 on the same host as the RFID and send the packets over the loopback interface.
 
+iv) this version of the software only remembers the mapping of rfids to stars
+within a run of the program. When the java process finishes, any mapping is 
+erased, next time you run - all stars will be in twinkle mode and the first
+RFID presented (irrespective of serial number) will select the first star in
+the sequence.
+
 Building/testing software:
 1) follow the adafruit guide on building the rfid library and sample code
 2) install oracle java8 on the beaglebone #1 (or in theory a pi or other small
 linux with USB serial support and a working ethernet)
-3) build this software with the command
+3) build this software on your laptop (or elsewhere - even on the BBB if you must) 
+with the command
 mvn package
 copy the resulting .jar file to the beaglebone #1
 run 
@@ -59,5 +77,10 @@ the stars should now twinkle.
 
 6) present an RFID.
 
+Handy HACKS:
+If you run a copy of this software on BBB #2 (with rfid set to /dev/zero and ipaddress to 127.0.0.1) 
+you can use it to provide a stand-alone 'twinkle' mode in the absense of a console.
 
+If you don't like the 'random' order the stars are selected in, re-generate the config file.
+This will create a different running order.
 
