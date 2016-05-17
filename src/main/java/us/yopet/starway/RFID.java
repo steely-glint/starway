@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -67,7 +69,7 @@ abstract public class RFID extends Thread {
             while (true) {
                 String line = _rfidtty.readLine();
                 Log.verb("Rfid >" + line);
-                if (line.contains("UID Value:")) {
+                if ((line !=null) && (line.contains("UID Value:"))) {
                     Log.verb("RFID seen");
                     String[] bits = line.split(":");
                     if (bits.length > 1) {
@@ -88,6 +90,12 @@ abstract public class RFID extends Thread {
                         if (previous == null) {
                             cardAddEvent(cardSerial);
                         }
+                    }
+                } else {
+                    try {
+                        Thread.sleep(EXPIRETIME/10);
+                    } catch (InterruptedException ex) {
+                        ;
                     }
                 }
             }
