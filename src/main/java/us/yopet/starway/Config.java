@@ -58,4 +58,11 @@ public class Config {
     String getRFID() {
        return _config.getString("RFID", "/dev/tty");
     }
+    
+    boolean isGalaMode() {
+        return _config.getBoolean("gala", false);
+    }
+    String getGalaStar(){
+        return _config.getString("galaStar","none");
+    }
 }

@@ -12,10 +12,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -31,6 +30,7 @@ abstract public class RFID extends Thread {
     RFID(String arduino) throws FileNotFoundException {
         File tty = new File(arduino);
         if (!tty.exists() || !tty.canRead()) {
+            Log.error("can't open/read " + arduino);
             throw new UnsupportedOperationException("can't open/read " + arduino);
         }
         _rfidtty = new DataInputStream(new FileInputStream(tty));
@@ -70,12 +70,12 @@ abstract public class RFID extends Thread {
                 String line = _rfidtty.readLine();
                 Log.verb("Rfid >" + line);
                 if ((line !=null) && (line.contains("UID Value:"))) {
-                    Log.verb("RFID seen");
+                    Log.debug("RFID seen");
                     String[] bits = line.split(":");
                     if (bits.length > 1) {
-                        Log.debug("card serial " + bits[1]);
+                        final String cardSerial = bits[1].trim().toLowerCase();
+                        Log.debug("card serial :" + cardSerial);
                         Long now = new Long(System.currentTimeMillis());
-                        final String cardSerial = bits[1];
                         Long previous = null;
                         synchronized (_seen) {
                             previous = _seen.put(cardSerial, now);
@@ -104,10 +104,10 @@ abstract public class RFID extends Thread {
         }
     }
 
-    public String[] currentCards() {
-        String[] ret = {};
+    public Set<String> currentCards() {
+        Set<String> ret = null;
         synchronized (_seen) {
-            ret = _seen.keySet().toArray(ret);
+            ret = _seen.keySet();
         }
         return ret;
     }

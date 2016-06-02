@@ -22,6 +22,8 @@ abstract public class Controller extends Thread {
 
     HashMap<Long, Star> _sequence;
     HashMap<String, Star> _selected;
+    HashMap<String, Star> _ids;
+
     Long _nextStar = new Long(0);
 
     protected final Star[] _stars;
@@ -29,6 +31,7 @@ abstract public class Controller extends Thread {
     private boolean _performing = false;
     protected ArrayList<Star> _onStars;
     protected final Config _conf;
+    protected boolean _gala;
 
     Controller(String confFile) throws FileNotFoundException {
         _conf = new Config();
@@ -42,20 +45,31 @@ abstract public class Controller extends Thread {
 
         _selected = new HashMap();
         _sequence = new HashMap();
+        _ids = new HashMap();
 
         for (int i = 0; i < _stars.length; i++) {
             // special case for last one ?
-            _stars[i] = new Star(jstars.getJsonObject(i));
-            _sequence.put(_stars[i].getSeq(), _stars[i]);
+            Star star = new Star(jstars.getJsonObject(i));
+            _stars[i] = star;
+            _sequence.put(star.getSeq(), star);
+            if (star.getId() != null) {
+                _ids.put(star.getId(), star);
+            }
+
         }
         _onStars = new ArrayList();
         InetSocketAddress iad = _conf.getSenderAddress();
         int allLeds = _conf.getMaxLeds();
+        _gala = _conf.isGalaMode();
         Log.debug("reserving space for " + allLeds + " Leds");
         _sender = new Sender(iad, allLeds);
     }
 
     abstract boolean hasSelectedCard();
+
+    void napTime() throws InterruptedException {
+        Thread.sleep(100);
+    }
 
     public void run() {
         for (Star s : _stars) {
@@ -68,7 +82,6 @@ abstract public class Controller extends Thread {
         try {
             while (true) {
                 try {
-                    Thread.sleep(100);
                     _performing = hasSelectedCard();
                     if (!_performing) {
                         for (Star s : _stars) {
@@ -80,6 +93,7 @@ abstract public class Controller extends Thread {
                         Star s[] = {};
                         _sender.send(_onStars.toArray(s));
                     }
+                    napTime();
                 } catch (InterruptedException ex) {
                     ;// who cares...
                 }
@@ -91,25 +105,31 @@ abstract public class Controller extends Thread {
 
     Star pickStar(String rfid) {
         Star ret = null;
-        // see if we have already allocated it
-        ret = _selected.get(rfid);
-        if (ret == null) {
-            // take the next one from the sequence
-            if (_sequence.size() > 0) {
-                ret = _sequence.remove(_nextStar);
-                if (ret != null) {
-                    Log.debug("Sequence number " + _nextStar);
-                    _nextStar = new Long(_nextStar.longValue() + 1);
-                }
-            }
-            // last gasp - just pick a random (ish) one
+        // in 'gala' mode we _strictly_ do rfids that are in the file
+        if (_gala) {
+            ret = _ids.get(rfid);
+        } else {
+            // see if we have already allocated it
+            ret = _selected.get(rfid);
+            // now see if we have an id match.
             if (ret == null) {
-                int l = rfid.hashCode();
-                int sno = l % (_stars.length - 1); // last star is special.
-                ret = _stars[sno];
+                // take the next one from the sequence
+                if (_sequence.size() > 0) {
+                    ret = _sequence.remove(_nextStar);
+                    if (ret != null) {
+                        Log.debug("Sequence number " + _nextStar);
+                        _nextStar = new Long(_nextStar.longValue() + 1);
+                    }
+                }
+                // last gasp - just pick a random (ish) one
+                if (ret == null) {
+                    int l = rfid.hashCode();
+                    int sno = l % (_stars.length - 1); // last star is special.
+                    ret = _stars[sno];
+                }
+                // either way remember what we did.
+                _selected.put(rfid, ret);
             }
-            // either way remember what we did.
-            _selected.put(rfid, ret);
         }
         return ret;
     }

@@ -9,6 +9,7 @@ import com.phono.srtplight.Log;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.json.Json;
@@ -38,10 +39,15 @@ public class Reno extends Controller {
     }
 
     private final RFID _rfid;
+    private String _galaStar;
 
     Reno(String confFile) throws FileNotFoundException {
         super(confFile);
         String arduino = _conf.getRFID();
+        _galaStar = _conf.getGalaStar();
+        if (_galaStar != null) {
+            _galaStar = _galaStar.trim().toLowerCase();
+        }
         final Sender localsender;
         final Star[] localStars;
         if (!arduino.contains("fake")) {
@@ -68,22 +74,26 @@ public class Reno extends Controller {
             @Override
             void cardDeleteEvent(String rfid) {
                 Star star = pickStar(rfid);
-                star.setColour(128, 128, 212);
-                _onStars.remove(star);
+                if (star != null) {
+                    star.setColour(128, 128, 212);
+                    _onStars.remove(star);
+                }
             }
 
             @Override
             void cardAddEvent(String rfid) {
                 Star star = pickStar(rfid);
-                star.setColour(255, 64, 64);
-                Log.debug("Star " + star.getName());
-                _onStars.add(star);
-                try {
-                    if ((localsender != null) && (localStars != null)) {
-                        localsender.send(localStars);
+                if (star != null) {
+                    star.setColour(255, 64, 64);
+                    Log.debug("Star " + star.getName());
+                    _onStars.add(star);
+                    try {
+                        if ((localsender != null) && (localStars != null)) {
+                            localsender.send(localStars);
+                        }
+                    } catch (IOException ex) {
+                        Log.error("ioexception in local send");
                     }
-                } catch (IOException ex) {
-                    Log.error("ioexception in local send");
                 }
 
             }
@@ -93,6 +103,17 @@ public class Reno extends Controller {
 
     @Override
     boolean hasSelectedCard() {
-        return _rfid.currentCards().length > 0;
+        Set<String> keys = _rfid.currentCards();
+        return keys.size() > 0;
+    }
+
+    @Override
+    void napTime() throws InterruptedException {
+        Set<String> keys = _rfid.currentCards();
+        if (this._gala && keys.contains(_galaStar)) {
+            Thread.sleep(20000);
+        } else {
+            super.napTime();
+        }
     }
 }

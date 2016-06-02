@@ -26,6 +26,7 @@ public class Star {
     private final int _twinkleAmplitude;
     private final int _twinkleDuration;
     private Long _seq = null;
+    private String _id;
 
     public Star(JsonObject config) {
         _twinkleCount = 0;
@@ -41,6 +42,10 @@ public class Star {
         _name = config.getString("name");
         _seq = new Long(config.getInt("seq", 0));
         _size = config.getInt("size", 0);
+        _id = config.getString("id", null);
+        if (_id != null){
+            _id = _id.trim().toLowerCase();
+        }
     }
 
     void put(ByteBuffer bb, int base) {
@@ -82,5 +87,8 @@ public class Star {
     }
     String getName(){
         return _name;
+    }
+    String getId(){
+        return _id;
     }
 }

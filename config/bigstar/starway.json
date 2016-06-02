@@ -1,7 +1,7 @@
 {
 	"outputMode": "ws281x",
 	"outputMapping": "rgb-123-v2",
-	"demoMode": "id",
+	"demoMode": "fade",
 	"ledsPerStrip": 144,
 	"usedStripCount": 6,
 	"colorChannelOrder": "BRG",
