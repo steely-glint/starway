@@ -59,11 +59,7 @@ abstract public class Controller extends Thread {
 
     public void run() {
         for (Star s : _stars) {
-            if (s.getName().equals("F1")) {
-                s.setColour(4, 64, 4); // center star is bright green .
-            } else {
                 s.setColour(8, 8, 32);
-            }
         }
         try {
             while (true) {
@@ -75,7 +71,6 @@ abstract public class Controller extends Thread {
                             s.twinkle();
                         }
                         _sender.send(_stars);
-
                     } else {
                         Star s[] = {};
                         _sender.send(_onStars.toArray(s));
