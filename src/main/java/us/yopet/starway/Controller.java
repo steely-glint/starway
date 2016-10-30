@@ -29,6 +29,7 @@ abstract public class Controller extends Thread {
     private boolean _performing = false;
     protected ArrayList<Star> _onStars;
     protected final Config _conf;
+    private Star[] _cache;
 
     Controller(String confFile) throws FileNotFoundException {
         _conf = new Config();
@@ -59,21 +60,70 @@ abstract public class Controller extends Thread {
 
     public void run() {
         for (Star s : _stars) {
-                s.setColour(8, 8, 32);
+            s.setColour(8, 8, 32);
         }
         try {
+            int perfcount = 0;
+            int r = 255, g = 0, b = 0;
+
             while (true) {
                 try {
                     Thread.sleep(100);
                     _performing = hasSelectedCard();
                     if (!_performing) {
+                        perfcount = -1;
                         for (Star s : _stars) {
                             s.twinkle();
                         }
                         _sender.send(_stars);
                     } else {
                         Star s[] = {};
-                        _sender.send(_onStars.toArray(s));
+                        if (perfcount == -1) {
+                            perfcount = 100;
+                            if (_cache == null){
+                                _cache = new Star[_stars.length];
+                                for(int i=0;i<_cache.length;i++){
+                                    _cache[i]= new Star(_stars[i]);
+                                }
+                            }
+                            for (int i=0;i<_stars.length;i++){
+                                Star src = _stars[i];
+                                Star dst = _cache[i];
+                                src.cloneColour(dst);
+                            }
+                        }
+                        if (perfcount > 0) {
+                            s = _stars;
+                            for (Star fade:s) {
+                                if (r > 0 && b == 0) {
+                                    r--;
+                                    g++;
+                                }
+                                if (g > 0 && r == 0) {
+                                    g--;
+                                    b++;
+                                }
+                                if (b > 0 && g == 0) {
+                                    r++;
+                                    b--;
+                                }
+                                fade.setColour(r, g, b);
+                            }
+                            perfcount--;              
+                            if (perfcount==0){
+                                for (int i=0;i<_stars.length;i++){
+                                    Star dst = _stars[i];
+                                    Star src = _cache[i];
+                                    src.cloneColour(dst);
+                                } 
+                            }
+                        } else { 
+                            _onStars.toArray(s);
+                            for (Star p:s){
+                                p.setColour(255, 64, 64);
+                            }
+                        }
+                        _sender.send(s);
                     }
                 } catch (InterruptedException ex) {
                     ;// who cares...

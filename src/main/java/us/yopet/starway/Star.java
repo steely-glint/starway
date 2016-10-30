@@ -43,6 +43,21 @@ public class Star {
         _size = config.getInt("size", 0);
     }
 
+    Star(Star clone) {
+        _twinkleCount = clone._twinkleCount;
+        _twinkleInterval = clone._twinkleAmplitude;
+        _twinkleAmplitude = 25;
+        _twinkleDuration = clone._twinkleDuration;
+
+        _leds = new RGBLed[clone._leds.length];
+        for (int i = 0; i < _leds.length; i++) {
+            _leds[i] = new RGBLed(clone._leds[i]._offset);
+        }
+        _name = clone._name;
+        _seq = clone._seq;
+        _size = clone._size;
+    }
+
     void put(ByteBuffer bb, int base) {
         for (RGBLed led : _leds) {
             led.put(bb, base);
@@ -82,5 +97,11 @@ public class Star {
     }
     String getName(){
         return _name;
+    }
+
+    void cloneColour(Star dst) {
+        if ((_leds != null) && (_leds.length>0)){
+            dst.setColour(_leds[0].red, _leds[0].green, _leds[0].blue);
+        }
     }
 }
