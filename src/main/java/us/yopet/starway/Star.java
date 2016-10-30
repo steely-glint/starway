@@ -91,17 +91,24 @@ public class Star {
     Long getSeq() {
         return _seq;
     }
-    
-    int getSize(){
+
+    int getSize() {
         return _size;
     }
-    String getName(){
+
+    String getName() {
         return _name;
     }
 
     void cloneColour(Star dst) {
-        if ((_leds != null) && (_leds.length>0)){
+        if ((_leds != null) && (_leds.length > 0)) {
             dst.setColour(_leds[0].red, _leds[0].green, _leds[0].blue);
+        }
+    }
+
+    void setColour(int[] cols) {
+        if ((cols != null) && (cols.length == 3)) {
+            this.setColour(cols[0], cols[1], cols[2]);
         }
     }
 }

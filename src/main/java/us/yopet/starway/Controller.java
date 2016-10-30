@@ -60,7 +60,7 @@ abstract public class Controller extends Thread {
 
     public void run() {
         for (Star s : _stars) {
-            s.setColour(8, 8, 32);
+            s.setColour(ColourMap.PALE);
         }
         try {
             int perfcount = 0;
@@ -79,22 +79,24 @@ abstract public class Controller extends Thread {
                     } else {
                         Star s[] = {};
                         if (perfcount == -1) {
-                            perfcount = 100;
-                            if (_cache == null){
+                            perfcount = 20;
+                            Log.debug("perfcount = " + perfcount);
+                            if (_cache == null) {
                                 _cache = new Star[_stars.length];
-                                for(int i=0;i<_cache.length;i++){
-                                    _cache[i]= new Star(_stars[i]);
+                                for (int i = 0; i < _cache.length; i++) {
+                                    _cache[i] = new Star(_stars[i]);
                                 }
                             }
-                            for (int i=0;i<_stars.length;i++){
+                            for (int i = 0; i < _stars.length; i++) {
                                 Star src = _stars[i];
                                 Star dst = _cache[i];
                                 src.cloneColour(dst);
                             }
                         }
                         if (perfcount > 0) {
+                            Log.debug("perfcount = " + perfcount);
                             s = _stars;
-                            for (Star fade:s) {
+                            for (Star fade : s) {
                                 if (r > 0 && b == 0) {
                                     r--;
                                     g++;
@@ -109,18 +111,21 @@ abstract public class Controller extends Thread {
                                 }
                                 fade.setColour(r, g, b);
                             }
-                            perfcount--;              
-                            if (perfcount==0){
-                                for (int i=0;i<_stars.length;i++){
+                            perfcount--;
+                            if (perfcount == 0) {
+                                Log.debug("perfcount first zero decache ");
+                                for (int i = 0; i < _stars.length; i++) {
                                     Star dst = _stars[i];
                                     Star src = _cache[i];
                                     src.cloneColour(dst);
-                                } 
+                                }
                             }
-                        } else { 
+                        } else {
+                            Log.debug("perfcount still zero - selexted star count is "+_onStars.size());
+                            s = new Star[_onStars.size()];
                             _onStars.toArray(s);
-                            for (Star p:s){
-                                p.setColour(255, 64, 64);
+                            for (Star p : s) {
+                                p.setColour(ColourMap.WISH);
                             }
                         }
                         _sender.send(s);
@@ -148,6 +153,7 @@ abstract public class Controller extends Thread {
                 }
             }
             // last gasp - just pick a random (ish) one
+            // go back to square one. ToDo
             if (ret == null) {
                 int l = rfid.hashCode();
                 int sno = l % (_stars.length - 1); // last star is special.
