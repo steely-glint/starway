@@ -25,7 +25,7 @@ abstract public class RFID extends Thread {
 
     private DataInputStream _rfidtty;
     private final HashMap<String, Long> _seen;
-    static long EXPIRETIME = 1000;
+    static long EXPIRETIME = 10000;
     private Timer _tick;
 
     RFID(String arduino) throws FileNotFoundException {

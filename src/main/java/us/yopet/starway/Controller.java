@@ -20,13 +20,13 @@ import javax.json.JsonArray;
  */
 abstract public class Controller extends Thread {
 
-    HashMap<Long, Star> _sequence;
-    HashMap<String, Star> _selected;
-    Long _nextStar = new Long(0);
+    private HashMap<Long, Star> _sequence;
+    private HashMap<String, Star> _selected;
+    private Long _nextStar = 0L;
 
     protected final Star[] _stars;
     private final Sender _sender;
-    private boolean _performing = false;
+    boolean _performing = false;
     protected ArrayList<Star> _onStars;
     protected final Config _conf;
     private Star[] _cache;
@@ -45,7 +45,6 @@ abstract public class Controller extends Thread {
         _sequence = new HashMap();
 
         for (int i = 0; i < _stars.length; i++) {
-            // special case for last one ?
             _stars[i] = new Star(jstars.getJsonObject(i));
             _sequence.put(_stars[i].getSeq(), _stars[i]);
         }
@@ -58,10 +57,17 @@ abstract public class Controller extends Thread {
 
     abstract boolean hasSelectedCard();
 
-    public void run() {
+    void resetSequence() {
         for (Star s : _stars) {
             s.setColour(ColourMap.PALE);
         }
+        _nextStar = 0L;
+        _selected.clear();
+        Log.debug("reset sequence");
+    }
+
+    public void run() {
+        resetSequence();
         try {
             int perfcount = 0;
             int r = 255, g = 0, b = 0;
@@ -80,7 +86,7 @@ abstract public class Controller extends Thread {
                         Star s[] = {};
                         if (perfcount == -1) {
                             perfcount = 20;
-                            Log.debug("perfcount = " + perfcount);
+                            Log.verb("perfcount = " + perfcount);
                             if (_cache == null) {
                                 _cache = new Star[_stars.length];
                                 for (int i = 0; i < _cache.length; i++) {
@@ -94,7 +100,7 @@ abstract public class Controller extends Thread {
                             }
                         }
                         if (perfcount > 0) {
-                            Log.debug("perfcount = " + perfcount);
+                            Log.verb("perfcount = " + perfcount);
                             s = _stars;
                             for (Star fade : s) {
                                 if (r > 0 && b == 0) {
@@ -113,15 +119,19 @@ abstract public class Controller extends Thread {
                             }
                             perfcount--;
                             if (perfcount == 0) {
-                                Log.debug("perfcount first zero decache ");
-                                for (int i = 0; i < _stars.length; i++) {
-                                    Star dst = _stars[i];
-                                    Star src = _cache[i];
-                                    src.cloneColour(dst);
+                                if (_nextStar >= _sequence.size()) {
+                                    resetSequence();
+                                } else {
+                                    Log.verb("verb first zero decache ");
+                                    for (int i = 0; i < _stars.length; i++) {
+                                        Star dst = _stars[i];
+                                        Star src = _cache[i];
+                                        src.cloneColour(dst);
+                                    }
                                 }
                             }
                         } else {
-                            Log.debug("perfcount still zero - selexted star count is "+_onStars.size());
+                            Log.verb("perfcount still zero - selexted star count is " + _onStars.size());
                             s = new Star[_onStars.size()];
                             _onStars.toArray(s);
                             for (Star p : s) {
@@ -145,19 +155,10 @@ abstract public class Controller extends Thread {
         ret = _selected.get(rfid);
         if (ret == null) {
             // take the next one from the sequence
-            if (_sequence.size() > 0) {
-                ret = _sequence.remove(_nextStar);
-                if (ret != null) {
-                    Log.debug("Sequence number " + _nextStar);
-                    _nextStar = new Long(_nextStar.longValue() + 1);
-                }
-            }
-            // last gasp - just pick a random (ish) one
-            // go back to square one. ToDo
-            if (ret == null) {
-                int l = rfid.hashCode();
-                int sno = l % (_stars.length - 1); // last star is special.
-                ret = _stars[sno];
+            ret = _sequence.get(_nextStar);
+            if (ret != null) {
+                Log.debug("Sequence number " + _nextStar);
+                _nextStar++;
             }
             // either way remember what we did.
             _selected.put(rfid, ret);

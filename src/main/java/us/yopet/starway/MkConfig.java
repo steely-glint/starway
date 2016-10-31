@@ -87,10 +87,10 @@ public class MkConfig {
             }
         }
         total_stars -= feeders.length;
-        /*ArrayList<Integer> seqList = new ArrayList();
+        ArrayList<Integer> seqList = new ArrayList();
         for (int i = 0; i < total_stars; i++) {
             seqList.add(new Integer(i));
-        }*/
+        }
         // this is the _capacity_ of the message sent - so includes all 
         // the buried stars and feeder boards.
         conf.add("maxLeds", (diamond_count) * longestleg * leds_per_star);
@@ -113,8 +113,8 @@ public class MkConfig {
                     Log.debug("Skipping feeder" + name);
                     ledno += leds_per_star;
                 } else {
-                    //int r = rand.nextInt(seqList.size());
-                    //Integer seq = seqList.remove(r);
+                    int r = rand.nextInt(seqList.size());
+                    seq = seqList.remove(r);
                     JsonArrayBuilder leds = Json.createArrayBuilder();
                     for (int l = 0; l < leds_per_star; l++) {
                         leds.add(ledno++);

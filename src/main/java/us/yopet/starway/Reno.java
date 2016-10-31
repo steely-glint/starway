@@ -7,10 +7,6 @@ package us.yopet.starway;
 
 import com.phono.srtplight.Log;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 
 /**
  *
@@ -51,9 +47,13 @@ public class Reno extends Controller {
 
             @Override
             void cardAddEvent(String rfid) {
-                Star star = pickStar(rfid);
-                Log.debug("Star " + star.getName());
-                _onStars.add(star);
+                if (!_performing) {
+                    Star star = pickStar(rfid);
+                    Log.debug("Star " + star.getName());
+                    _onStars.add(star);
+                } else {
+                    Log.debug("Already performing - so ignoring id " + rfid);
+                }
             }
         };
 
