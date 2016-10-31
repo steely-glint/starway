@@ -1,0 +1,17 @@
+#!/bin/sh
+DIRNAME="`dirname "$0"`"
+cd "$DIRNAME"
+
+# Uncomment to ensure that SSH is running. It really sucks when you (or systemd) screw up it doesn't start. Since HDMI is disabled,
+# it's REALLY important that SSHd be running, since you have no other easy option to connect.
+# (sleep 30; /usr/bin/sshd -f /etc/ssh/sshd_config) &
+
+modprobe uio_pruss
+sleep 10 
+su - thp -c 'nohup java -Xmx128m -jar pipe-java-client-1.0-SNAPSHOT.jar  >thing.out &'
+sleep 10
+su - thp -c 'nohup ./starway.sh > starway.out &'
+sleep 10 
+nohup python -u /home/thp/buttonP8.py >/home/thp/fakerfid &
+sleep 10
+./opc-server --config starway.json > ledscape.out
