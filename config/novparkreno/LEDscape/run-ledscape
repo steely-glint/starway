@@ -8,7 +8,7 @@ cd "$DIRNAME"
 
 modprobe uio_pruss
 sleep 10 
-su - thp -c 'nohup java -Xmx128m -jar pipe-java-client-1.0-SNAPSHOT.jar  >thing.out &'
+su - thp -c 'nohup java -Xmx128m -jar pipe-java-client-1.0-SNAPSHOT.jar  >/dev/null &'
 sleep 10
 su - thp -c 'nohup ./starway.sh > starway.out &'
 sleep 10 

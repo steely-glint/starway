@@ -59,7 +59,7 @@ public class MkConfig {
             "B10", "B25", "B38",
             "C10", "C25", "C38",
             "D10", "D25", "D38",
-            "E10", "E20", "E30"
+            "E11", "E21", "E31"
         };
 
         Log.setLevel(Log.VERB);
