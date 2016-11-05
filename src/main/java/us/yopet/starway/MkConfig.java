@@ -52,14 +52,14 @@ public class MkConfig {
 
         // assuming central star is E39
         char diamonds[] = {'A', 'B', 'C', 'D', 'E'};
-        int leglengths[] = {43, 51, 51, 51, 39};
+        int leglengths[] = {38,51,51,51,44};
         int leds_per_star = 3;
 
-        String feeders[] = {"A10", "A21", "A31", "A37",
-            "B10", "B25", "B38",
-            "C10", "C25", "C38",
-            "D10", "D25", "D38",
-            "E11", "E21", "E31"
+        String feeders[] = {"A10", "A20" ,"A30",
+                        "B10", "B24", "B36",
+                        "C10", "C24", "C36",
+                        "D10", "D24", "D36",
+                        "E11", "E22", "E32", "E38"
         };
 
         Log.setLevel(Log.VERB);
