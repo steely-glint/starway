@@ -42,7 +42,7 @@ public class Star {
         _seq = new Long(config.getInt("seq", 0));
         _size = config.getInt("size", 0);
     }
-
+/*
     Star(Star clone) {
         _twinkleCount = clone._twinkleCount;
         _twinkleInterval = clone._twinkleAmplitude;
@@ -57,7 +57,7 @@ public class Star {
         _seq = clone._seq;
         _size = clone._size;
     }
-
+*/
     void put(ByteBuffer bb, int base) {
         for (RGBLed led : _leds) {
             led.put(bb, base);
@@ -70,6 +70,7 @@ public class Star {
             led.blue = b;
             led.green = g;
         }
+        _twinkleCount = 0;
     }
 
     void twinkle() {
@@ -99,13 +100,13 @@ public class Star {
     String getName() {
         return _name;
     }
-
+/* the clone stuff didn't really work.
     void cloneColour(Star dst) {
         if ((_leds != null) && (_leds.length > 0)) {
             dst.setColour(_leds[0].red, _leds[0].green, _leds[0].blue);
         }
     }
-
+*/
     void setColour(int[] cols) {
         if ((cols != null) && (cols.length == 3)) {
             this.setColour(cols[0], cols[1], cols[2]);

@@ -1,0 +1,19 @@
+{ "stars":[
+            {"name":"br", "leds": [0, 1, 2], "seq":3,"size":"U" },
+            {"name":"mr","leds": [3, 4],"seq":11,"size":"U" },
+            {"name":"sr", "leds": [5],"seq":5,"size":"U"},
+            {"name":"by", "leds": [6, 7, 8],"seq":2,"size":"U"},
+            {"name":"my", "leds": [9, 10],"seq":10,"size":"U"},
+            {"name":"sy","leds": [11],"seq":1,"size":"U"},
+            {"name":"bo","leds": [12, 13, 14],"seq":9,"size":"U"},
+            {"name":"mo", "leds": [15, 16],"seq":4,"size":"U"},
+            {"name":"so", "leds": [17],"seq":6,"size":"U"},
+            {"name":"bb", "leds": [18, 19, 20],"size":"U"},
+            {"name":"mb","leds": [21, 22],"seq":7,"size":"U"},
+            {"name":"sb", "leds": [23],"seq":8,"size":"U"}
+],
+"boneAddress": "192.67.4.18",
+"bonePort": 7890,
+"maxLeds": 24,
+"RFID": "fakerfid"
+}

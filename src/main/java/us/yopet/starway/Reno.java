@@ -41,16 +41,20 @@ public class Reno extends Controller {
             @Override
             void cardDeleteEvent(String rfid) {
                 Star star = pickStar(rfid);
-                star.setColour(ColourMap.BRIGHT);
-                _onStars.remove(star);
+                if (star != null) {
+                    //star.setColour(ColourMap.BRIGHT);
+                    _onStars.remove(star);
+                }
             }
 
             @Override
             void cardAddEvent(String rfid) {
                 if (!_performing) {
                     Star star = pickStar(rfid);
-                    Log.debug("Star " + star.getName());
-                    _onStars.add(star);
+                    if (star != null) {
+                        Log.debug("Star " + star.getName());
+                        _onStars.add(star);
+                    }
                 } else {
                     Log.debug("Already performing - so ignoring id " + rfid);
                 }

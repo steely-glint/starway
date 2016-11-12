@@ -10,7 +10,10 @@ package us.yopet.starway;
  * @author thp
  */
 public class ColourMap {
+
     final static int[] BRIGHT = {128, 128, 212}; // brighter blue
     final static int[] WISH = {255, 64, 64}; // colour to wish on
     final static int[] PALE = {8, 8, 32}; // initial colour
+    final static int[] OFF = {0, 0, 0}; // initial colour
+
 }

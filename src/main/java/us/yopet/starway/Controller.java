@@ -58,88 +58,83 @@ abstract public class Controller extends Thread {
     abstract boolean hasSelectedCard();
 
     void resetSequence() {
-        for (Star s : _stars) {
-            s.setColour(ColourMap.PALE);
-        }
         _nextStar = 0L;
         _selected.clear();
         Log.debug("reset sequence");
+        setForTwinkle();
+    }
+
+    void doFade(int[] c) {
+        if (c[0] > 0 && c[2] == 0) {
+            c[0]--;
+            c[1]++;
+        }
+        if (c[1] > 0 && c[0] == 0) {
+            c[1]--;
+            c[2]++;
+        }
+        if (c[2] > 0 && c[1] == 0) {
+            c[0]++;
+            c[2]--;
+        }
+    }
+
+    void setForTwinkle() {
+        for (Star s : _stars) {
+            s.setColour(ColourMap.PALE);
+        }
+        Log.debug("ReSet " + _selected.size() + " Selected stars to bright");
+        _selected.forEach((String n, Star ss) -> {
+            ss.setColour(ColourMap.BRIGHT);
+        });
+        _onStars.clear();
+        if (_nextStar >= _sequence.size()) {
+            resetSequence();
+        }
     }
 
     public void run() {
         resetSequence();
         try {
             int perfcount = 0;
-            int r = 255, g = 0, b = 0;
+            int[] pir = {255, 0, 0};
 
             while (true) {
                 try {
                     Thread.sleep(100);
                     _performing = hasSelectedCard();
                     if (!_performing) {
-                        perfcount = -1;
+                        if (perfcount != -1) {
+                            perfcount = -1;
+                            setForTwinkle();
+                        }
                         for (Star s : _stars) {
                             s.twinkle();
                         }
-                        _sender.send(_stars);
                     } else {
-                        Star s[] = {};
                         if (perfcount == -1) {
                             perfcount = 20;
                             Log.verb("perfcount = " + perfcount);
-                            if (_cache == null) {
-                                _cache = new Star[_stars.length];
-                                for (int i = 0; i < _cache.length; i++) {
-                                    _cache[i] = new Star(_stars[i]);
-                                }
-                            }
-                            for (int i = 0; i < _stars.length; i++) {
-                                Star src = _stars[i];
-                                Star dst = _cache[i];
-                                src.cloneColour(dst);
-                            }
                         }
                         if (perfcount > 0) {
                             Log.verb("perfcount = " + perfcount);
-                            s = _stars;
-                            for (Star fade : s) {
-                                if (r > 0 && b == 0) {
-                                    r--;
-                                    g++;
-                                }
-                                if (g > 0 && r == 0) {
-                                    g--;
-                                    b++;
-                                }
-                                if (b > 0 && g == 0) {
-                                    r++;
-                                    b--;
-                                }
-                                fade.setColour(r, g, b);
+                            for (Star fade : _stars) {
+                                doFade(pir);
+                                fade.setColour(pir);
                             }
                             perfcount--;
-                            if (perfcount == 0) {
-                                if (_nextStar >= _sequence.size()) {
-                                    resetSequence();
-                                } else {
-                                    Log.verb("verb first zero decache ");
-                                    for (int i = 0; i < _stars.length; i++) {
-                                        Star dst = _stars[i];
-                                        Star src = _cache[i];
-                                        src.cloneColour(dst);
-                                    }
-                                }
-                            }
                         } else {
                             Log.verb("perfcount still zero - selexted star count is " + _onStars.size());
-                            s = new Star[_onStars.size()];
-                            _onStars.toArray(s);
-                            for (Star p : s) {
-                                p.setColour(ColourMap.WISH);
+                            for (Star s : _stars) {
+                                s.setColour(ColourMap.OFF);
+                            }
+                            for (Star s : _onStars) {
+                                s.setColour(ColourMap.WISH);
                             }
                         }
-                        _sender.send(s);
                     }
+                    _sender.send(_stars);
+
                 } catch (InterruptedException ex) {
                     ;// who cares...
                 }
@@ -151,14 +146,22 @@ abstract public class Controller extends Thread {
 
     Star pickStar(String rfid) {
         Star ret = null;
+        Log.debug("in PickStar looking for " + rfid);
         // see if we have already allocated it
         ret = _selected.get(rfid);
+        Log.debug("star from selected was " + ((ret == null) ? " null " : ret.getName()));
         if (ret == null) {
             // take the next one from the sequence
             ret = _sequence.get(_nextStar);
+            Log.debug("star from sequence was " + ((ret == null) ? " null " : ret.getName()));
             if (ret != null) {
                 Log.debug("Sequence number " + _nextStar);
                 _nextStar++;
+            } else {
+                Log.debug("because nextStar is :" + _nextStar + " Sequence size is " + _sequence.size());
+                _sequence.keySet().stream().forEach((Long a) -> {
+                    Log.debug("->" + a);
+                });
             }
             // either way remember what we did.
             _selected.put(rfid, ret);
