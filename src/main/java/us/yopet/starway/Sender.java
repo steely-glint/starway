@@ -25,12 +25,8 @@ public class Sender {
 
     void send(Star[] stars) throws IOException {
 
-        short body_len = (short) (_capacity - 4);
         ByteBuffer buffer = ByteBuffer.allocate(_capacity);
-        buffer.put(0, (byte) 0);// channel
-        buffer.put(1, (byte) 0);// command
-        buffer.putShort(2, body_len);
-        int offs = 4;
+        int offs = 0;
         for (Star s : stars) {
             s.put(buffer, offs);
         }
@@ -42,7 +38,7 @@ public class Sender {
 
     Sender(InetSocketAddress address,int ledCount) {
         _toAdd = address;
-        _capacity = (ledCount * 3 + 4);        
+        _capacity = (ledCount * 3 + 3);        
         try {
             _udp = new DatagramSocket();
         } catch (SocketException ex) {

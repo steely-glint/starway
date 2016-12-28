@@ -29,37 +29,21 @@ public class MkConfig {
 
     /**
      *
-     * Background : This generates config files for the full Starway as at Reno
-     * Nov '16 in the sculpture park. It consists of 5 diamonds joined in the
-     * shape of a star. (A->E) Each diamond nominally has 51 stars. However the
-     * first and last diamonds are 'legs' and are shortened to give the illusion
-     * that Starway is partially buried. Stars are named by the diamond and
-     * their number. Each Star contains 3 RGB leds. Some of the stars on each
-     * leg are present but invisible (feeder boards) The leds for these boards
-     * should be skipped and left unlit at all times.
-     *
-     * Each diamond is driven from a separate dataline on a beaglebone running
-     * LEDscape - Ledscape's datamodel assumes all the lines are driving the
-     * same number of Leds. In practice this means that despite the fact that
-     * Diamond A actually contains 129 Leds Diamond B must start with led number
-     * 153. (the remaining 30 leds are 'buried')
-     *
-     * This config generates a random 'sequence' for the Stars. It can be hand
-     * tweaked after the fact.
+* config for CCC matelight
      *
      */
     public static void main(String args[]) throws IOException {
 
         // assuming central star is E39
-        char diamonds[] = {'A', 'B', 'C', 'D', 'E'};
-        int leglengths[] = {38,51,51,51,44};
-        int leds_per_star = 3;
+        char diamonds[] = new char[16];
+        int leglengths[] = new int[16];
+        for(int i=0;i<16;i++){
+            diamonds[i]=(char)('A'+i);
+            leglengths[i] =40;
+        }
+        int leds_per_star = 1;
 
-        String feeders[] = {"A10", "A20" ,"A30",
-                        "B10", "B24", "B36",
-                        "C10", "C24", "C36",
-                        "D10", "D24", "D36",
-                        "E11", "E22", "E32", "E38"
+        String feeders[] = {
         };
 
         Log.setLevel(Log.VERB);
@@ -70,8 +54,8 @@ public class MkConfig {
             fWriter = new java.io.OutputStreamWriter(System.out);
         }
         JsonObjectBuilder conf = Json.createObjectBuilder();
-        conf.add("boneAddress", "127.0.0.1");
-        conf.add("bonePort", 7890);
+        conf.add("boneAddress", "matelight.visitor.congress.ccc.de");
+        conf.add("bonePort", 1377);
         conf.add("RFID", "fakerfid");
 
         Random rand = new Random();
